@@ -1,0 +1,68 @@
+<html>
+<head>
+    <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+    <script type="text/javascript" charset="utf-8">
+
+        var socket = io();
+
+        socket.on('device-removed', function(payload) {
+            var containerSelector = 'container_' + payload.internal_name;
+            var container = document.getElementById(containerSelector);
+            if (container) {
+                container.remove();
+            }
+        });
+
+        socket.on('level', function(payload) {
+            var peaks = payload.peak;
+            var containerSelector = 'container_' + payload.internal_name;
+            var container = document.getElementById(containerSelector);
+            if (!container) {
+                container = document.createElement('div');
+                container.id = containerSelector;
+
+                var title = document.createElement('h1');
+                title.textContent = payload.display_name + ' ( ' + payload.internal_name + ' ):';
+                title.classList = 'device_name';
+                container.appendChild(title);
+
+                document.getElementById('devices_container').appendChild(container);
+            }
+
+            for (var idx=0; idx < peaks.length; idx++) {
+                var peak = peaks[idx];
+                var selector = [containerSelector, 'channel', idx].join('_');
+                var bar = document.getElementById(selector);
+                if (!bar) {
+                    bar = document.createElement('div');
+                    bar.className = 'bar';
+                    bar.id = selector;
+                    container.appendChild(bar);
+                }
+                var length = 98 * Math.pow(10, peak / 10);
+                bar.style.width = length + 'vw';
+            }
+        });
+    </script>
+
+    <style type="text/css">
+        .bar {
+            height: 2vh;
+            min-width: 0vw;
+            max-width: 98vw;
+            border: 0.25vw solid red;
+            margin-bottom: 1vw;
+            background: black;
+        }
+
+        .device_name {
+            font-family: sans-serif;
+            font-size: larger;
+        }
+    </style>
+</head>
+<body>
+    <div id="devices_container">
+    </div>
+</body>
+</html>
