@@ -51,19 +51,19 @@ if __name__ == '__main__':
     glib_task = socketio.start_background_task(target=glib_loop)
 
     def on_device_added(monitor, device):
-        monitor = AudioLevelMonitor(device=device, socket=socketio)
-        audio_monitors.append(monitor)
-        audio_monitors_map[device.internal_name] = monitor
+        audio_monitor = AudioLevelMonitor(device=device)
+        audio_monitors.append(audio_monitor)
+        audio_monitors_map[device.internal_name] = audio_monitor
 
     def on_device_removed(monitor, device):
-        monitor = audio_monitors_map.get(device.internal_name, None)
-        if monitor:
+        audio_monitor = audio_monitors_map.get(device.internal_name, None)
+        if audio_monitor:
             del audio_monitors_map[device.internal_name]
-            monitor.stop()
+            audio_monitor.stop()
 
     for device in device_monitor.get_devices():
-        monitor = AudioLevelMonitor(device=device, socket=socketio)
-        audio_monitors.append(monitor)
+        audio_monitor = AudioLevelMonitor(device=device)
+        audio_monitors.append(audio_monitor)
 
     device_monitor.connect('device-added',   on_device_added)
     device_monitor.connect('device-removed', on_device_removed)
