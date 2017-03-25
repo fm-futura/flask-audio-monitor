@@ -4,6 +4,7 @@ import time
 from threading import Thread
 
 from flask import Flask, render_template
+from flask.json import jsonify
 from flask_socketio import SocketIO
 
 
@@ -26,6 +27,10 @@ device_monitor = DeviceMonitor(socket=socketio)
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/devices')
+def devices():
+    return jsonify([d._asdict() for d in device_monitor.get_devices()])
 
 
 def glib_loop (*args, **kwargs):
