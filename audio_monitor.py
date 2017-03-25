@@ -48,12 +48,12 @@ if __name__ == '__main__':
     def on_device_added(monitor, device):
         monitor = AudioLevelMonitor(device=device, socket=socketio)
         audio_monitors.append(monitor)
-        audio_monitors_map[device.props.internal_name] = monitor
+        audio_monitors_map[device.internal_name] = monitor
 
     def on_device_removed(monitor, device):
-        monitor = audio_monitors_map.get(device.props.internal_name, None)
+        monitor = audio_monitors_map.get(device.internal_name, None)
         if monitor:
-            del audio_monitors_map[device.props.internal_name]
+            del audio_monitors_map[device.internal_name]
             monitor.stop()
 
     for device in device_monitor.get_devices():

@@ -1,7 +1,10 @@
+from collections import namedtuple
 import gi, gi.repository
 
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst, GLib, GObject
+
+Device = namedtuple('Device', ['internal_name', 'display_name'])
 
 class DeviceMonitor(GObject.GObject):
     __gsignals__ = {
@@ -23,8 +26,12 @@ class DeviceMonitor(GObject.GObject):
     def start(self):
         self.monitor.start()
 
-    def get_devices(self):
+    def _get_devices(self):
         return self.monitor.get_devices()
+
+    def get_devices(self):
+        devices = [Device(internal_name=d.props.internal_name, display_name=d.props.display_name) for d in self.monitor.get_devices()]
+        return devices
 
     def bus_element_cb (self, bus, msg, arg=None):
         s = msg.get_structure()
@@ -41,14 +48,15 @@ class DeviceMonitor(GObject.GObject):
         }
         action = action_name_map[name]
 
-        device = s.get_value('device')
+        raw_device = s.get_value('device')
+        device = Device(internal_name=raw_device.props.internal_name, display_name=raw_device.props.display_name)
 
         self.emit(action, device)
 
         if self.socket is not None:
             self.socket.emit(action, {
-                'display_name': device.props.display_name,
-                'internal_name': device.props.internal_name,
+                'display_name':  device.display_name,
+                'internal_name': device.internal_name,
             }, broadcast=True)
 
         return True
@@ -66,11 +74,11 @@ class AudioLevelMonitor(GObject.GObject):
         self.device = device
         self.socket = socket
         self.payload = {
-            'display_name': device.props.display_name,
-            'internal_name': device.props.internal_name,
+            'display_name':  device.display_name,
+            'internal_name': device.internal_name,
         }
 
-        pipe = self.pipe = Gst.parse_launch('pulsesrc name=source device="{0}" ! level post-messages=true name=level ! fakesink sync=true'.format(device.props.internal_name))
+        pipe = self.pipe = Gst.parse_launch('pulsesrc name=source device="{0}" ! level post-messages=true name=level ! fakesink sync=true'.format(device.internal_name))
 
         bus = pipe.get_bus()
         bus.add_signal_watch()
@@ -101,8 +109,8 @@ class AudioLevelMonitor(GObject.GObject):
 
             if self.socket is not None:
                 self.socket.emit('level', self.payload, broadcast=False)
-                self.socket.emit('peak', peak, broadcast=False)
-                self.socket.emit('rms',  rms,  broadcast=False)
+                self.socket.emit('peak',  peak,         broadcast=False)
+                self.socket.emit('rms',   rms,          broadcast=False)
 
             self.emit('level', self.payload)
 
