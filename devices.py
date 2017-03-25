@@ -30,7 +30,7 @@ class DeviceMonitor(GObject.GObject):
         return self.monitor.get_devices()
 
     def get_devices(self):
-        devices = [Device(internal_name=d.props.internal_name, display_name=d.props.display_name) for d in self.monitor.get_devices()]
+        devices = [Device(internal_name=d.props.internal_name, display_name=d.props.display_name) for d in self._get_devices()]
         return devices
 
     def bus_element_cb (self, bus, msg, arg=None):
