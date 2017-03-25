@@ -54,16 +54,22 @@ if __name__ == '__main__':
         audio_monitor = AudioLevelMonitor(device=device)
         audio_monitors.append(audio_monitor)
         audio_monitors_map[device.internal_name] = audio_monitor
+        audio_monitor.connect('level', on_level)
 
     def on_device_removed(monitor, device):
         audio_monitor = audio_monitors_map.get(device.internal_name, None)
         if audio_monitor:
             del audio_monitors_map[device.internal_name]
             audio_monitor.stop()
+            audio_monitor.disconnect_by_func(on_level)
+
+    def on_level(audio_monitor, payload):
+        socketio.emit('level', payload)
 
     for device in device_monitor.get_devices():
         audio_monitor = AudioLevelMonitor(device=device)
         audio_monitors.append(audio_monitor)
+        audio_monitor.connect('level', on_level)
 
     device_monitor.connect('device-added',   on_device_added)
     device_monitor.connect('device-removed', on_device_removed)

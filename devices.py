@@ -67,12 +67,11 @@ class AudioLevelMonitor(GObject.GObject):
        "level":   (GObject.SIGNAL_RUN_FIRST, None, [GObject.TYPE_PYOBJECT]),
     }
 
-    def __init__(self, device, socket):
+    def __init__(self, device):
         GObject.GObject.__init__(self)
 
         self.stopped = False
         self.device = device
-        self.socket = socket
         self.payload = {
             'display_name':  device.display_name,
             'internal_name': device.internal_name,
@@ -107,13 +106,5 @@ class AudioLevelMonitor(GObject.GObject):
 
             self.emit('level', self.payload)
 
-            if self.socket is not None:
-                self.socket.emit('level', self.payload, broadcast=False)
-                self.socket.emit('peak',  peak,         broadcast=False)
-                self.socket.emit('rms',   rms,          broadcast=False)
-
         return True
-
-
-
 
