@@ -1,3 +1,5 @@
+import sys
+
 import time
 from threading import Thread
 
@@ -11,7 +13,7 @@ gi.require_version('Gst', '1.0')
 from gi.repository import Gst, GLib, GObject
 
 GObject.threads_init()
-Gst.init(None)
+Gst.init(sys.argv)
 
 from devices import DeviceMonitor, AudioLevelMonitor
 
