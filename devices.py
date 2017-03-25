@@ -112,8 +112,6 @@ class AudioLevelMonitor(GObject.GObject):
                 self.socket.emit('peak',  peak,         broadcast=False)
                 self.socket.emit('rms',   rms,          broadcast=False)
 
-            self.emit('level', self.payload)
-
         return True
 
 
