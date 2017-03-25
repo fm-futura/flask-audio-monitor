@@ -12,10 +12,9 @@ class DeviceMonitor(GObject.GObject):
        "device-removed": (GObject.SIGNAL_RUN_FIRST, None, [GObject.TYPE_PYOBJECT]),
     }
 
-    def __init__(self, socket=None):
+    def __init__(self):
         GObject.GObject.__init__(self)
 
-        self.socket = socket
         self.monitor = Gst.DeviceMonitor.new()
         self.monitor.add_filter('Audio/Source')
 
@@ -52,12 +51,6 @@ class DeviceMonitor(GObject.GObject):
         device = Device(internal_name=raw_device.props.internal_name, display_name=raw_device.props.display_name)
 
         self.emit(action, device)
-
-        if self.socket is not None:
-            self.socket.emit(action, {
-                'display_name':  device.display_name,
-                'internal_name': device.internal_name,
-            }, broadcast=True)
 
         return True
 

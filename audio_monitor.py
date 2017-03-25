@@ -22,7 +22,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 
-device_monitor = DeviceMonitor(socket=socketio)
+device_monitor = DeviceMonitor()
 
 @app.route('/')
 def index():
@@ -56,7 +56,18 @@ if __name__ == '__main__':
         audio_monitors_map[device.internal_name] = audio_monitor
         audio_monitor.connect('level', on_level)
 
+        socketio.emit('device-added', {
+            'display_name':  device.display_name,
+            'internal_name': device.internal_name,
+        }, broadcast=True)
+
+
     def on_device_removed(monitor, device):
+        socketio.emit('device-removed', {
+            'display_name':  device.display_name,
+            'internal_name': device.internal_name,
+        }, broadcast=True)
+
         audio_monitor = audio_monitors_map.get(device.internal_name, None)
         if audio_monitor:
             del audio_monitors_map[device.internal_name]
