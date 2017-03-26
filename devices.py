@@ -1,10 +1,16 @@
-from collections import namedtuple
+from munch import Munch
+
 import gi, gi.repository
 
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst, GLib, GObject
 
-Device = namedtuple('Device', ['internal_name', 'display_name'])
+
+def Device(raw_device):
+    return Munch(
+        internal_name=raw_device.props.internal_name,
+        display_name=raw_device.props.display_name
+    )
 
 class DeviceMonitor(GObject.GObject):
     __gsignals__ = {
@@ -29,7 +35,7 @@ class DeviceMonitor(GObject.GObject):
         return self.monitor.get_devices()
 
     def get_devices(self):
-        devices = [Device(internal_name=d.props.internal_name, display_name=d.props.display_name) for d in self._get_devices()]
+        devices = [Device(d) for d in self._get_devices()]
         return devices
 
     def bus_element_cb (self, bus, msg, arg=None):
@@ -48,7 +54,7 @@ class DeviceMonitor(GObject.GObject):
         action = action_name_map[name]
 
         raw_device = s.get_value('device')
-        device = Device(internal_name=raw_device.props.internal_name, display_name=raw_device.props.display_name)
+        device = Device(raw_device)
 
         self.emit(action, device)
 

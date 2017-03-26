@@ -30,7 +30,7 @@ def index():
 
 @app.route('/devices')
 def devices():
-    return jsonify([d._asdict() for d in device_monitor.get_devices()])
+    return jsonify(device_monitor.get_devices())
 
 
 def glib_loop (*args, **kwargs):

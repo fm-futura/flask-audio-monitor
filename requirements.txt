@@ -3,3 +3,4 @@ Flask-Environments
 flask-socketio
 eventlet
 argparse
+munch==2.1.1
