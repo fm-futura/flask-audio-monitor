@@ -85,10 +85,10 @@ class AudioLevelMonitor(GObject.GObject):
 
     def stop(self):
         self.stopped = True
+        self.pipe.set_state(Gst.State.NULL)
 
     def bus_element_cb (self, bus, msg, arg=None):
         if self.stopped:
-            self.pipe.set_state(Gst.State.NULL)
             return False
 
         s = msg.get_structure()
