@@ -1,7 +1,5 @@
 import sys
-
 import time
-from threading import Thread
 
 from flask import Flask, render_template
 from flask.json import jsonify
@@ -32,14 +30,15 @@ def index():
 def devices():
     return jsonify(device_monitor.get_devices())
 
+def yield_to_socketio(*args, **kwargs):
+    socketio.sleep(0.01)
+    return True
 
 def glib_loop (*args, **kwargs):
     loop = GLib.MainLoop.new(None, False)
-    ctx = loop.get_context()
-    while True:
-        while ctx.pending():
-            ctx.iteration()
-        socketio.sleep()
+    GLib.idle_add(yield_to_socketio)
+    return loop.run()
+
 
 if __name__ == '__main__':
     import signal
