@@ -1,20 +1,20 @@
 import sys
-import time
 
 from flask import Flask, render_template
 from flask.json import jsonify
 from flask_socketio import SocketIO
 
+from devices import DeviceMonitor, AudioLevelMonitor
 
-import gi, gi.repository
+import gi
+import gi.repository
 
 gi.require_version('Gst', '1.0')
-from gi.repository import Gst, GLib, GObject
+from gi.repository import Gst, GLib, GObject    # noqa
 
 GObject.threads_init()
 Gst.init(sys.argv)
 
-from devices import DeviceMonitor, AudioLevelMonitor
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -22,19 +22,23 @@ socketio = SocketIO(app)
 
 device_monitor = DeviceMonitor()
 
+
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 @app.route('/devices')
 def devices():
     return jsonify(device_monitor.get_devices())
 
+
 def yield_to_socketio(*args, **kwargs):
     socketio.sleep(0.01)
     return True
 
-def glib_loop (*args, **kwargs):
+
+def glib_loop(*args, **kwargs):
     loop = GLib.MainLoop.new(None, False)
     GLib.idle_add(yield_to_socketio)
     return loop.run()
@@ -59,7 +63,6 @@ if __name__ == '__main__':
             'display_name':  device.display_name,
             'internal_name': device.internal_name,
         }, broadcast=True)
-
 
     def on_device_removed(monitor, device):
         socketio.emit('device-removed', {

@@ -1,26 +1,29 @@
 import sys
-
 import argparse
 
-import gi, gi.repository
+import gi
+import gi.repository
 
 gi.require_version('Gst', '1.0')
-from gi.repository import Gst, GLib, GObject
+from gi.repository import Gst, GLib, GObject    # noqa
 
 GObject.threads_init()
 Gst.init(sys.argv)
 
-from devices import DeviceMonitor
+from devices import DeviceMonitor   # noqa
 
 DEVICE_NAME_WIDTH = 74
 DISPLAY_FORMAT = '{0:%i} {1}' % DEVICE_NAME_WIDTH
 
+
 def display_device(device):
     print(DISPLAY_FORMAT.format(device.internal_name, device.display_name))
+
 
 def on_device_added(monitor, device):
     print('Device added:')
     display_device(device)
+
 
 def on_device_removed(monitor, device):
     print('Device removed:')

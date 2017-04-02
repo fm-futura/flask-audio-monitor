@@ -1,9 +1,10 @@
 from munch import Munch
 
-import gi, gi.repository
+import gi
+import gi.repository
 
 gi.require_version('Gst', '1.0')
-from gi.repository import Gst, GLib, GObject
+from gi.repository import Gst, GLib, GObject    # noqa
 
 
 def Device(raw_device):
@@ -11,6 +12,7 @@ def Device(raw_device):
         internal_name=raw_device.props.internal_name,
         display_name=raw_device.props.display_name
     )
+
 
 class DeviceMonitor(GObject.GObject):
     __gsignals__ = {
@@ -38,7 +40,7 @@ class DeviceMonitor(GObject.GObject):
         devices = [Device(d) for d in self._get_devices()]
         return devices
 
-    def bus_element_cb (self, bus, msg, arg=None):
+    def bus_element_cb(self, bus, msg, arg=None):
         s = msg.get_structure()
         if s is None:
             return True
@@ -76,7 +78,11 @@ class AudioLevelMonitor(GObject.GObject):
             'internal_name': device.internal_name,
         }
 
-        pipe = self.pipe = Gst.parse_launch('pulsesrc name=source device="{0}" ! level post-messages=true name=level ! fakesink sync=true'.format(device.internal_name))
+        pipe = self.pipe = Gst.parse_launch('''
+                                        pulsesrc name=source device="{0}"
+                                        ! level post-messages=true name=level
+                                        ! fakesink sync=true'''
+                                            .format(device.internal_name))
 
         bus = pipe.get_bus()
         bus.add_signal_watch()
@@ -87,7 +93,7 @@ class AudioLevelMonitor(GObject.GObject):
         self.stopped = True
         self.pipe.set_state(Gst.State.NULL)
 
-    def bus_element_cb (self, bus, msg, arg=None):
+    def bus_element_cb(self, bus, msg, arg=None):
         if self.stopped:
             return False
 
